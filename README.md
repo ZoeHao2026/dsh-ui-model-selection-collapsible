@@ -4,6 +4,12 @@
 
 Adds independently collapsible provider groups to the DeepSeek Harness model selector while preserving the official data, selection, configuration, and invocation paths.
 
+![AI 生成的插件概念横幅](docs/assets/model-selector-hero-ai.png)
+
+上图是 AI 生成的原创概念图，用于表达供应商分组、展开、折叠和模型连接关系，不代表 DSH 的实际界面或 DeepSeek 官方视觉。
+
+## 实际界面
+
 ![DSH 折叠模型选择器](docs/assets/model-selector-expanded.png)
 
 ## 功能
