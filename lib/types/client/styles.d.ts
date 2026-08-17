@@ -1,0 +1,32 @@
+export declare const styles: {
+    readonly root: "dsh-cmsc-root";
+    readonly trigger: "dsh-cmsc-trigger";
+    readonly triggerLabel: "dsh-cmsc-triggerLabel";
+    readonly triggerEffort: "dsh-cmsc-triggerEffort";
+    readonly chevron: "dsh-cmsc-chevron";
+    readonly chevronOpen: "dsh-cmsc-chevronOpen";
+    readonly menu: "dsh-cmsc-menu";
+    readonly status: "dsh-cmsc-status";
+    readonly empty: "dsh-cmsc-empty";
+    readonly error: "dsh-cmsc-error";
+    readonly warning: "dsh-cmsc-warning";
+    readonly retry: "dsh-cmsc-retry";
+    readonly groups: "dsh-cmsc-groups";
+    readonly group: "dsh-cmsc-group";
+    readonly groupHeader: "dsh-cmsc-groupHeader";
+    readonly groupTitle: "dsh-cmsc-groupTitle";
+    readonly groupCount: "dsh-cmsc-groupCount";
+    readonly groupBody: "dsh-cmsc-groupBody";
+    readonly groupBodyInner: "dsh-cmsc-groupBodyInner";
+    readonly option: "dsh-cmsc-option";
+    readonly selected: "dsh-cmsc-selected";
+    readonly optionCopy: "dsh-cmsc-optionCopy";
+    readonly modelName: "dsh-cmsc-modelName";
+    readonly description: "dsh-cmsc-description";
+    readonly check: "dsh-cmsc-check";
+    readonly cell: "dsh-cmsc-cell";
+    readonly cellLabel: "dsh-cmsc-cellLabel";
+    readonly cellValue: "dsh-cmsc-cellValue";
+    readonly cellChevron: "dsh-cmsc-cellChevron";
+};
+//# sourceMappingURL=styles.d.ts.map

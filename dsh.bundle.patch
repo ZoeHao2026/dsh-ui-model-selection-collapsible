@@ -1,0 +1,5 @@
+# DSH bundle contribution for the collapsible model selector.
+# The official model-selection plugin remains enabled as the priority-0 fallback.
+- insert:
+    - id: ui-model-selection-collapsible
+      name: '@local/dsh-ui-model-selection-collapsible'
