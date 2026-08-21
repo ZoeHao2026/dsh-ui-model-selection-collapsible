@@ -6,7 +6,8 @@ import {
   CollapsibleModelSelect,
   type CollapsibleModelSelectProps,
 } from '../src/client/CollapsibleModelSelect.js'
-import { groups, stateOf, TestStore } from './helpers.js'
+import type { ProviderDisclosure } from '../src/client/preferences.js'
+import { groups, stateOf, TestPreferencesStore, TestStore } from './helpers.js'
 
 const labels: Record<string, string> = {
   'trigger.fallback': 'Select model',
@@ -38,6 +39,7 @@ function renderSeat(
   overrides: Partial<CollapsibleModelSelectProps> = {},
 ) {
   const store = new TestStore(initial)
+  const preferences = overrides.preferences ?? new TestPreferencesStore()
   const load = vi.fn()
   const select = vi.fn(async () => true)
   const props: CollapsibleModelSelectProps = {
@@ -46,11 +48,12 @@ function renderSeat(
     directory: store,
     load,
     select,
+    preferences,
     t,
     ...overrides,
   }
   const view = render(<CollapsibleModelSelect {...props} />)
-  return { ...view, store, load, select, props }
+  return { ...view, store, load, select, preferences, props }
 }
 
 async function enterModelPane(user: ReturnType<typeof userEvent.setup>) {
@@ -102,7 +105,7 @@ describe('CollapsibleModelSelect', () => {
       'tabindex',
       '-1',
     )
-    expect(screen.getByRole('menuitemradio', { name: /Alpha Fast model/ })).toHaveAttribute(
+    expect(screen.getByRole('menuitemradio', { name: 'Alpha' })).toHaveAttribute(
       'aria-checked',
       'true',
     )
@@ -126,10 +129,40 @@ describe('CollapsibleModelSelect', () => {
     expect(providerABody).toHaveAttribute('data-expanded', 'false')
     expect(providerABody).toHaveAttribute('aria-hidden', 'true')
     expect(providerABody).toHaveAttribute('inert')
-    expect(providerABody?.querySelector('[aria-label="Alpha Fast model"]')).toHaveAttribute(
+    expect(providerABody?.querySelector('[aria-label="Alpha"]')).toHaveAttribute(
       'tabindex',
       '-1',
     )
+  })
+
+  it.each<[
+    disclosure: ProviderDisclosure,
+    expectedA: boolean,
+    expectedB: boolean,
+  ]>([
+    ['current', true, false],
+    ['all', true, true],
+    ['none', false, false],
+    ['accordion', true, false],
+  ])('applies the %s provider disclosure preference', async (disclosure, expectedA, expectedB) => {
+    const user = userEvent.setup()
+    renderSeat(stateOf(), {
+      preferences: new TestPreferencesStore({ providerDisclosure: disclosure }),
+    })
+    await enterModelPane(user)
+
+    const providerA = screen.getByRole('menuitem', { name: 'Provider A 2' })
+    const providerB = screen.getByRole('menuitem', { name: 'Provider B 1' })
+    expect(providerA).toHaveAttribute('aria-expanded', String(expectedA))
+    expect(providerB).toHaveAttribute('aria-expanded', String(expectedB))
+
+    if (disclosure === 'accordion') {
+      await user.click(providerB)
+      expect(providerA).toHaveAttribute('aria-expanded', 'false')
+      expect(providerB).toHaveAttribute('aria-expanded', 'true')
+      await user.click(providerB)
+      expect(providerB).toHaveAttribute('aria-expanded', 'false')
+    }
   })
 
   it('starts fully collapsed when the current model is absent from the catalog', async () => {
@@ -176,7 +209,7 @@ describe('CollapsibleModelSelect', () => {
     await user.keyboard('{ArrowDown}')
     expect(providerA).toHaveFocus()
     await user.keyboard('{ArrowDown}')
-    expect(screen.getByRole('menuitemradio', { name: /Alpha Fast model/ })).toHaveFocus()
+    expect(screen.getByRole('menuitemradio', { name: 'Alpha' })).toHaveFocus()
     expect(screen.queryByRole('menuitemradio', { name: 'Gamma' })).not.toBeInTheDocument()
 
     await user.keyboard('{Escape}')
@@ -198,7 +231,7 @@ describe('CollapsibleModelSelect', () => {
     await enterModelPane(user)
     expect(screen.getByText('Provider C failed: timeout')).toBeVisible()
     expect(screen.getByRole('menuitem', { name: 'Reload' })).toBeVisible()
-    expect(screen.getByRole('menuitemradio', { name: /Alpha Fast model/ })).toBeVisible()
+    expect(screen.getByRole('menuitemradio', { name: 'Alpha' })).toBeVisible()
   })
 
   it('shows loading, empty, and whole-request failure states', async () => {
@@ -264,6 +297,7 @@ describe('CollapsibleModelSelect', () => {
         directory={store}
         load={vi.fn()}
         select={select}
+        preferences={new TestPreferencesStore()}
         t={t}
       />,
     )
@@ -288,5 +322,40 @@ describe('CollapsibleModelSelect', () => {
     expect(group).toHaveAttribute('aria-labelledby', header.id)
     expect(within(group as HTMLElement).getAllByRole('menuitemradio')).toHaveLength(2)
     expect(within(group as HTMLElement).getAllByRole('menuitemradio')[0]).toBeDisabled()
+  })
+
+  it('applies density and motion preferences reactively', async () => {
+    const user = userEvent.setup()
+    const preferences = new TestPreferencesStore({ density: 'compact', motion: 'none' })
+    const { container } = renderSeat(stateOf(), { preferences })
+    const root = container.firstElementChild
+    expect(root).toHaveAttribute('data-density', 'compact')
+    expect(root).toHaveAttribute('data-motion', 'none')
+
+    await enterModelPane(user)
+    const description = screen.getByText('Fast model')
+    expect(description).toHaveStyle({ width: '1px', height: '1px', position: 'absolute' })
+    const providerA = screen.getByRole('menuitem', { name: 'Provider A 2' })
+    const body = document.getElementById(providerA.getAttribute('aria-controls') ?? '')
+    expect(getComputedStyle(body as HTMLElement).transition).toBe('none')
+
+    act(() => preferences.set({ density: 'comfortable', motion: 'system' }))
+    expect(root).toHaveAttribute('data-density', 'comfortable')
+    expect(root).toHaveAttribute('data-motion', 'system')
+  })
+
+  it('opens from the trigger with ArrowDown and focuses the first menu item', async () => {
+    const user = userEvent.setup()
+    const { load } = renderSeat()
+    const trigger = screen.getByRole('button', { name: /Select model/ })
+    trigger.focus()
+
+    await user.keyboard('{ArrowDown}')
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    expect(load).toHaveBeenCalledTimes(2)
+    await waitFor(() =>
+      expect(screen.getByRole('menuitem', { name: /^Model/ })).toHaveFocus(),
+    )
   })
 })

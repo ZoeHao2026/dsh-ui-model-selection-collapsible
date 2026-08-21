@@ -317,6 +317,207 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
+.dsh-cmsc-root[data-density='compact'] .dsh-cmsc-groupHeader {
+  min-height: 28px;
+  padding-block: 3px;
+}
+
+.dsh-cmsc-root[data-density='compact'] .dsh-cmsc-option {
+  min-height: 32px;
+  padding-block: 4px;
+}
+
+.dsh-cmsc-root[data-density='compact'] .dsh-cmsc-description {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.dsh-cmsc-root[data-motion='none'] .dsh-cmsc-chevron,
+.dsh-cmsc-root[data-motion='none'] .dsh-cmsc-groupBody,
+.dsh-cmsc-root[data-motion='none'] .dsh-cmsc-groupBody[data-expanded='false'],
+.dsh-cmsc-root[data-motion='none'] .dsh-cmsc-groupBodyInner {
+  transition: none;
+}
+
+.dsh-cmsc-root[data-motion='none'] .dsh-cmsc-groupBodyInner,
+.dsh-cmsc-root[data-motion='none']
+  .dsh-cmsc-groupBody[data-expanded='false']
+  .dsh-cmsc-groupBodyInner {
+  transform: none;
+}
+
+.dsh-cmsc-settingsSection {
+  width: min(680px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 4px 0 28px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.dsh-cmsc-settingsHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dsh-cmsc-settingsTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 30px;
+}
+
+.dsh-cmsc-settingsIntro,
+.dsh-cmsc-settingsScope,
+.dsh-cmsc-settingsDescription {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.dsh-cmsc-settingsScope {
+  width: fit-content;
+  padding: 6px 9px;
+  color: var(--dsw-alias-label-secondary);
+  background: var(--dsw-alias-bg-module-platform);
+  border-radius: 8px;
+}
+
+.dsh-cmsc-settingsGroup {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.dsh-cmsc-settingsLegend {
+  padding: 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.dsh-cmsc-settingsDescription {
+  margin-top: 3px;
+}
+
+.dsh-cmsc-settingsChoices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dsh-cmsc-settingsChoice {
+  min-width: 0;
+  min-height: 70px;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  cursor: pointer;
+  background: var(--dsw-alias-bg-module-platform);
+  border: 1px solid var(--dsw-alias-border-l3);
+  border-radius: 12px;
+}
+
+.dsh-cmsc-settingsChoice:hover,
+.dsh-cmsc-settingsChoice[data-selected='true'] {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.dsh-cmsc-settingsChoice[data-selected='true'] {
+  border-color: var(--dsw-alias-label-secondary);
+}
+
+.dsh-cmsc-settingsChoice:has(.dsh-cmsc-settingsRadio:focus-visible) {
+  outline: 2px solid var(--dsw-alias-border-l3);
+  outline-offset: 2px;
+}
+
+.dsh-cmsc-settingsRadio {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.dsh-cmsc-settingsChoiceCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dsh-cmsc-settingsChoiceTitle {
+  color: var(--dsw-alias-label-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.dsh-cmsc-settingsChoiceDescription {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.dsh-cmsc-settingsChoiceCheck {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  color: var(--dsw-alias-label-primary);
+}
+
+.dsh-cmsc-settingsReset {
+  width: fit-content;
+  min-height: 32px;
+  padding: 5px 12px;
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l3);
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dsh-cmsc-settingsReset:hover:not(:disabled),
+.dsh-cmsc-settingsReset:focus-visible {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.dsh-cmsc-settingsReset:focus-visible {
+  outline: 2px solid var(--dsw-alias-border-l3);
+  outline-offset: 2px;
+}
+
+.dsh-cmsc-settingsReset:disabled {
+  color: var(--dsw-alias-label-dimmed);
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .dsh-cmsc-settingsChoices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dsh-cmsc-chevron,
   .dsh-cmsc-groupBody,

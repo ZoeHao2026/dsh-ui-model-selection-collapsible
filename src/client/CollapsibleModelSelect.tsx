@@ -22,11 +22,12 @@ import {
 
 import './styles.css'
 import { choicesOf, currentChoiceOf, defaultExpanded, toggled } from './model-state.js'
+import type { PreferencesStore } from './preferences.js'
 import { styles } from './styles.js'
 
 type Pane = 'root' | 'model' | 'effort'
 export type CollapsibleModelSelectProps = ModelSelectInjected &
-  { locked: boolean } &
+  { locked: boolean; preferences: PreferencesStore } &
   PropsLocale<'model'>
 
 interface EffortChoice {
@@ -49,12 +50,18 @@ export function CollapsibleModelSelect({
   directory,
   load,
   select,
+  preferences,
   t,
 }: CollapsibleModelSelectProps) {
   const state = useSyncExternalStore(
     (notify) => directory.subscribe(notify),
     () => directory.getSnapshot(),
   )
+  const preferenceSnapshot = useSyncExternalStore(
+    preferences.subscribe,
+    preferences.getSnapshot,
+  )
+  const preference = preferenceSnapshot.value
   const [open, setOpen] = useState(false)
   const [pane, setPane] = useState<Pane>('root')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
@@ -128,8 +135,8 @@ export function CollapsibleModelSelect({
 
   useEffect(() => {
     if (pane !== 'model' || groupTouchedRef.current) return
-    setExpanded(currentProviderId === undefined ? new Set() : new Set([currentProviderId]))
-  }, [pane, currentProviderId])
+    setExpanded(defaultExpanded(currentChoice, state.groups, preference.providerDisclosure))
+  }, [pane, currentChoice, state.groups, preference.providerDisclosure])
 
   if (!available) return null
 
@@ -233,7 +240,7 @@ export function CollapsibleModelSelect({
 
   const enterModelPane = () => {
     groupTouchedRef.current = false
-    setExpanded(defaultExpanded(currentChoice))
+    setExpanded(defaultExpanded(currentChoice, state.groups, preference.providerDisclosure))
     setPane('model')
     focusBoundary('first')
   }
@@ -245,7 +252,7 @@ export function CollapsibleModelSelect({
 
   const toggleGroup = (groupId: string) => {
     groupTouchedRef.current = true
-    setExpanded((previous) => toggled(previous, groupId))
+    setExpanded((previous) => toggled(previous, groupId, preference.providerDisclosure))
   }
 
   const modelLabel = currentChoice?.model.name ?? t('trigger.fallback')
@@ -258,7 +265,14 @@ export function CollapsibleModelSelect({
         : t('trigger.ariaEffort', { model: modelLabel, effort: effortLabel })
 
   return (
-    <div ref={rootRef} className={styles.root} onKeyDown={onRootKeyDown} onBlur={onBlur}>
+    <div
+      ref={rootRef}
+      className={styles.root}
+      data-density={preference.density}
+      data-motion={preference.motion}
+      onKeyDown={onRootKeyDown}
+      onBlur={onBlur}
+    >
       <button
         ref={triggerRef}
         type="button"
@@ -270,6 +284,13 @@ export function CollapsibleModelSelect({
         title={triggerLabel}
         disabled={locked}
         onClick={() => (open ? close() : show())}
+        onKeyDown={(event) => {
+          if (open || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) return
+          event.preventDefault()
+          event.stopPropagation()
+          show()
+          focusBoundary(event.key === 'ArrowDown' ? 'first' : 'last')
+        }}
       >
         <span className={styles.triggerLabel}>{modelLabel}</span>
         {effortLabel === undefined ? null : (
@@ -332,9 +353,9 @@ export function CollapsibleModelSelect({
                 </div>
               ))}
               <div className={clsx(styles.groups, 'scrollable')}>
-                {state.groups.map((group) => {
-                  const headingId = `${id}-${group.id}-header`
-                  const listId = `${id}-${group.id}-models`
+                {state.groups.map((group, groupIndex) => {
+                  const headingId = `${id}-group-${groupIndex}-header`
+                  const listId = `${id}-group-${groupIndex}-models`
                   const groupOpen = expanded.has(group.id)
                   return (
                     <div role="presentation" className={styles.group} key={group.id}>
@@ -365,21 +386,25 @@ export function CollapsibleModelSelect({
                         className={styles.groupBody}
                       >
                         <div className={styles.groupBodyInner}>
-                          {group.models.map((model) => {
+                          {group.models.map((model, modelIndex) => {
                             const selected =
                               state.current?.provider === group.id && state.current.model === model.id
+                            const descriptionId = `${listId}-model-${modelIndex}-description`
                             return (
                               <button
                                 type="button"
                                 role="menuitemradio"
-                                aria-label={
-                                  model.description === undefined
-                                    ? model.name
-                                    : `${model.name} ${model.description}`
+                                aria-label={model.name}
+                                aria-describedby={
+                                  model.description === undefined ? undefined : descriptionId
                                 }
                                 aria-checked={selected}
                                 className={clsx(styles.option, selected && styles.selected)}
-                                title={model.name}
+                                title={
+                                  model.description === undefined
+                                    ? model.name
+                                    : `${model.name} — ${model.description}`
+                                }
                                 tabIndex={groupOpen ? undefined : -1}
                                 disabled={busy}
                                 onClick={() => choose({ provider: group.id, model: model.id })}
@@ -388,7 +413,9 @@ export function CollapsibleModelSelect({
                                 <span className={styles.optionCopy}>
                                   <span className={styles.modelName}>{model.name}</span>
                                   {model.description === undefined ? null : (
-                                    <span className={styles.description}>{model.description}</span>
+                                    <span id={descriptionId} className={styles.description}>
+                                      {model.description}
+                                    </span>
                                   )}
                                 </span>
                                 <span className={styles.check}>

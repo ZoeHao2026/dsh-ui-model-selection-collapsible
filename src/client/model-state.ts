@@ -1,6 +1,8 @@
 import type { ModelSelection } from '@deepseek-ai/dsh-api-remotes/client'
 import type { ModelDirectoryState } from '@deepseek-ai/dsh-client-ui-model-selection/client'
 
+import type { ProviderDisclosure } from './preferences.js'
+
 export type ProviderGroup = ModelDirectoryState['groups'][number]
 export type ProviderModel = ProviderGroup['models'][number]
 
@@ -37,11 +39,24 @@ export function currentChoiceOf(
   )
 }
 
-export function defaultExpanded(current: ModelChoice | undefined): Set<string> {
+export function defaultExpanded(
+  current: ModelChoice | undefined,
+  groups: ModelDirectoryState['groups'],
+  disclosure: ProviderDisclosure,
+): Set<string> {
+  if (disclosure === 'all') return new Set(groups.map((group) => group.id))
+  if (disclosure === 'none') return new Set()
   return current === undefined ? new Set() : new Set([current.group.id])
 }
 
-export function toggled(expanded: ReadonlySet<string>, providerId: string): Set<string> {
+export function toggled(
+  expanded: ReadonlySet<string>,
+  providerId: string,
+  disclosure: ProviderDisclosure,
+): Set<string> {
+  if (disclosure === 'accordion') {
+    return expanded.has(providerId) ? new Set() : new Set([providerId])
+  }
   const next = new Set(expanded)
   if (next.has(providerId)) next.delete(providerId)
   else next.add(providerId)

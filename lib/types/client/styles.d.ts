@@ -28,5 +28,21 @@ export declare const styles: {
     readonly cellLabel: "dsh-cmsc-cellLabel";
     readonly cellValue: "dsh-cmsc-cellValue";
     readonly cellChevron: "dsh-cmsc-cellChevron";
+    readonly settingsSection: "dsh-cmsc-settingsSection";
+    readonly settingsHeader: "dsh-cmsc-settingsHeader";
+    readonly settingsTitle: "dsh-cmsc-settingsTitle";
+    readonly settingsIntro: "dsh-cmsc-settingsIntro";
+    readonly settingsScope: "dsh-cmsc-settingsScope";
+    readonly settingsGroup: "dsh-cmsc-settingsGroup";
+    readonly settingsLegend: "dsh-cmsc-settingsLegend";
+    readonly settingsDescription: "dsh-cmsc-settingsDescription";
+    readonly settingsChoices: "dsh-cmsc-settingsChoices";
+    readonly settingsChoice: "dsh-cmsc-settingsChoice";
+    readonly settingsRadio: "dsh-cmsc-settingsRadio";
+    readonly settingsChoiceCopy: "dsh-cmsc-settingsChoiceCopy";
+    readonly settingsChoiceTitle: "dsh-cmsc-settingsChoiceTitle";
+    readonly settingsChoiceDescription: "dsh-cmsc-settingsChoiceDescription";
+    readonly settingsChoiceCheck: "dsh-cmsc-settingsChoiceCheck";
+    readonly settingsReset: "dsh-cmsc-settingsReset";
 };
 //# sourceMappingURL=styles.d.ts.map

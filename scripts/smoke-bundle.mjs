@@ -96,23 +96,43 @@ assert.deepEqual(transitionNoneSelectors, new Set([
   '.dsh-cmsc-groupBody[data-expanded="false"]',
   '.dsh-cmsc-groupBodyInner',
 ]))
+assert.ok(pluginCss.includes("[data-density='compact'] .dsh-cmsc-option"))
+assert.ok(pluginCss.includes("[data-motion='none'] .dsh-cmsc-groupBody"))
+assert.ok(pluginCss.includes('.dsh-cmsc-settingsSection'))
 assert.deepEqual([...new Set(required)].sort(), Object.keys(modules).sort())
 assert.ok(!required.includes('@deepseek-ai/dsh-client-ui-model-selection'))
 
 let dynamicDependencies
 let dynamicMount
-let slotName
-let registration
-let registeredComponent
-let registerDisposed = false
-const registerDisposer = () => {
-  registerDisposed = true
+const registrations = []
+const registeredComponents = []
+const disposedRegistrations = []
+const registeredLocales = []
+const effectDisposers = []
+const localeDictionaries = new Map()
+const register = (options, component) => {
+  registrations.push(options)
+  registeredComponents.push(component)
+  const dispose = () => disposedRegistrations.push(options.name)
+  return dispose
 }
+const injectSlot = (_name, mount) => mount()
 const ctx = {
   locale: {
-    register() {
-      throw new Error('the local plugin must never register a locale')
+    register(namespace, dictionaries) {
+      assert.notEqual(namespace, 'model')
+      registeredLocales.push(namespace)
+      localeDictionaries.set(namespace, dictionaries)
+      return () => localeDictionaries.delete(namespace)
     },
+    bind(namespace) {
+      return (key) => localeDictionaries.get(namespace)?.en?.[key] ?? key
+    },
+  },
+  slots: { inject: injectSlot, register },
+  effect(mount) {
+    const disposer = mount()
+    if (typeof disposer === 'function') effectDisposers.push(disposer)
   },
   inject(dependencies, mount) {
     dynamicDependencies = Array.from(dependencies)
@@ -122,7 +142,20 @@ const ctx = {
 
 exports.apply(ctx)
 assert.deepEqual(dynamicDependencies, ['modelDirectories'])
-assert.equal(registration, undefined)
+assert.deepEqual(registeredLocales, ['settings.modelSelectionCollapsible'])
+assert.equal(registrations.length, 2)
+const settingsRegistration = registrations[0]
+assert.equal(settingsRegistration.name, 'settings.section')
+assert.equal(settingsRegistration.id, 'model-selection-collapsible')
+assert.equal(settingsRegistration.order, 30)
+assert.equal(settingsRegistration.locale, 'settings.modelSelectionCollapsible')
+assert.equal(settingsRegistration.label(), 'Model selector')
+assert.equal(typeof settingsRegistration.inject().preferences.getSnapshot, 'function')
+const chatRegistration = registrations[1]
+assert.equal(chatRegistration.name, 'chat.input.model')
+assert.equal(chatRegistration.locale, 'model')
+assert.equal(typeof registeredComponents[1], 'function')
+assert.equal(typeof chatRegistration.inject().preferences.getSnapshot, 'function')
 
 const store = {
   subscribe: () => () => undefined,
@@ -147,27 +180,21 @@ const scope = {
   },
   sessions: { subagentAddress: () => undefined },
   slots: {
-    inject(name, mount) {
-      slotName = name
-      return mount()
-    },
-    register(options, component) {
-      registration = options
-      registeredComponent = component
-      return registerDisposer
-    },
+    inject: injectSlot,
+    register,
   },
 }
 
 dynamicMount(scope)
-assert.equal(slotName, 'conversation.input.model')
-assert.equal(registration.name, 'conversation.input.model')
-assert.equal(registration.locale, 'model')
-assert.equal(registration.priority, -1)
-assert.equal(typeof registeredComponent, 'function')
-assert.equal(registerDisposed, false)
-registerDisposer()
-assert.equal(registerDisposed, true)
+assert.equal(registrations.length, 3)
+const modelRegistration = registrations[2]
+assert.equal(modelRegistration.name, 'conversation.input.model')
+assert.equal(modelRegistration.locale, 'model')
+assert.equal(modelRegistration.priority, -1)
+assert.equal(typeof registeredComponents[2], 'function')
+assert.equal(typeof modelRegistration.inject('session-1').preferences.getSnapshot, 'function')
+effectDisposers.reverse().forEach((dispose) => dispose())
+assert.equal(localeDictionaries.size, 0)
 
 const host = await import(`${pathToFileURL(path.join(root, 'lib', 'index.js')).href}?smoke=1`)
 assert.equal(typeof host.apply, 'function')

@@ -71,6 +71,9 @@ const client = await readFile(path.join(outDir, 'client.js'), 'utf8')
 const requiredFragments = [
   `id: ${JSON.stringify(packageName)}`,
   'conversation.input.model',
+  'settings.section',
+  'settings.modelSelectionCollapsible',
+  '@local/dsh-ui-model-selection-collapsible/preferences/v1',
   'priority: -1',
   'locale: "model"',
   'sourceMappingURL=client.js.map',
@@ -80,8 +83,8 @@ for (const fragment of requiredFragments) {
 }
 
 const forbiddenFragments = [
-  'locale.register',
-  'ctx.locale.register',
+  'locale.register("model"',
+  "locale.register('model'",
   'Simplified Chinese dictionary',
   '正在刷新模型列表',
 ]

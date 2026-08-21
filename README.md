@@ -10,17 +10,35 @@ Adds independently collapsible provider groups to the DeepSeek Harness model sel
 
 ## 实际界面
 
+模型菜单：
+
 ![DSH 折叠模型选择器](docs/assets/model-selector-expanded.png)
+
+设置页：
+
+![DSH 模型选择器设置](docs/assets/model-selector-settings.jpg)
 
 ## 功能
 
 - 每个模型供应商可以独立展开或折叠，并显示模型数量。
-- 默认只展开当前已选模型所属的供应商；没有匹配项时保持全部折叠。
+- 可在 DSH 设置中选择“当前供应商”“全部展开”“全部折叠”或“单组展开”。
+- 可切换舒适/紧凑列表密度，以及跟随系统/关闭折叠动画。
 - 展开、收起、箭头和透明度使用统一的 160 ms 对称动画，并支持 `prefers-reduced-motion`。
 - 提供 `menuitem`、`menuitemradio`、`aria-expanded`、`aria-controls`、`aria-checked` 和可见项键盘导航。
+- 模型触发器支持上下方向键直接打开菜单，并聚焦首项或末项。
 - 直接复用官方 `modelDirectories` 服务、`model` 本地化命名空间和选择数据结构。
 - 自定义席位使用优先级 `-1`；官方优先级 `0` 的模型选择器保持安装并作为运行时后备。
-- 不新增命令、设置、配置 schema、RPC 或本地化命名空间。
+- 不新增命令、Host 配置 schema 或 RPC，也绝不重复注册官方 `model` 本地化命名空间。
+
+## 设置
+
+打开 DSH 的“设置”，选择“模型选择器”即可修改：
+
+- 供应商分组的初始展开策略。
+- 模型列表的舒适或紧凑密度。
+- 折叠动画是否跟随系统设置。
+
+默认值与 `0.1.x` 的行为一致：仅展开当前供应商、舒适密度、动画跟随系统。偏好保存在当前浏览器与 DSH Web 地址的 `localStorage` 中，会即时生效并在刷新后保留；它们不会写入 `settings.yaml`、修改模型配置或改变调用数据。浏览器阻止本地存储时，设置页会明确提示，更改仅在当前页面生命周期内有效。
 
 ## 兼容性
 
@@ -63,7 +81,7 @@ node $dshBin plugin --profile web add "link:$sourceRoot"
 
 ## 设计边界
 
-插件只替换 `conversation.input.model` 的可视席位。它不会修改 DSH 官方插件或模型选择 RPC，也不会注册 `model` locale。`modelDirectories` 服务延迟出现、卸载或不兼容时，自定义席位不会挂载，由官方席位接管。
+插件只替换 `conversation.input.model` 的可视席位，并通过官方 `settings.section` 扩展点添加自己的设置页。它不会修改 DSH 官方插件或模型选择 RPC，也不会注册 `model` locale。`modelDirectories` 服务延迟出现、卸载或不兼容时，自定义席位不会挂载，由官方席位接管；设置外壳不存在时，仅隐藏设置页，不影响模型席位。
 
 ## 项目状态
 
