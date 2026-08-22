@@ -1,5 +1,6 @@
 import type { ModelSelection } from '@deepseek-ai/dsh-api-remotes/client';
 import type { ModelDirectoryState } from '@deepseek-ai/dsh-client-ui-model-selection/client';
+import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-runtime/client';
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots';
 import type { PreferencesStore } from './preferences.js';
 /**
@@ -9,15 +10,10 @@ import type { PreferencesStore } from './preferences.js';
  * against a directory adapter backed by the chat conversation's model state.
  */
 export interface ChatModelDirectoryFace {
-    getDirectory(): {
-        subscribe(listener: () => void): () => void;
-        getSnapshot(): {
-            groups: ModelDirectoryState['groups'];
-            current: ModelSelection | null;
-            available: boolean;
-            locked: boolean;
-        };
-    };
+    getDirectory(): ObservableSnapshot<ModelDirectoryState & {
+        available: boolean;
+        locked: boolean;
+    }>;
     load(): void;
     select(selection: ModelSelection): Promise<boolean>;
 }

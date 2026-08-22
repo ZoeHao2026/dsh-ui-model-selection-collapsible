@@ -42,7 +42,7 @@ Adds independently collapsible provider groups to the DeepSeek Harness model sel
 
 ## 兼容性
 
-当前经过完整验证的基线是 DSH `0.1.0-rc.6`、Web 平台和 Node.js 22 或更高版本。DSH 仍处于开发预览阶段；升级 DSH 后，请先重新运行类型、bundle 和浏览器生命周期测试。
+当前经过完整验证的基线是 DSH `0.1.1-rc.2`、Web 平台和 Node.js 22 或更高版本。DSH 仍处于开发预览阶段；升级 DSH 后，请先重新运行类型、bundle 和浏览器生命周期测试。
 
 ## 从 GitHub 安装
 

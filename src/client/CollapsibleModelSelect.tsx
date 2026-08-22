@@ -1,5 +1,9 @@
 import type { ModelSelection } from '@deepseek-ai/dsh-api-remotes/client'
-import type { ModelSelectInjected } from '@deepseek-ai/dsh-client-ui-model-selection/client'
+import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
+import type {
+  ModelDirectoryState,
+  ModelSelectInjected,
+} from '@deepseek-ai/dsh-client-ui-model-selection/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import {
   IconCheckOutline16,
@@ -26,7 +30,8 @@ import type { PreferencesStore } from './preferences.js'
 import { styles } from './styles.js'
 
 type Pane = 'root' | 'model' | 'effort'
-export type CollapsibleModelSelectProps = ModelSelectInjected &
+export type CollapsibleModelSelectProps = Omit<ModelSelectInjected, 'directory'> &
+  { directory: ObservableSnapshot<ModelDirectoryState> } &
   { locked: boolean; preferences: PreferencesStore } &
   PropsLocale<'model'>
 

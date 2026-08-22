@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import type { ModelSelection } from '@deepseek-ai/dsh-api-remotes/client'
 import type { ModelDirectoryState } from '@deepseek-ai/dsh-client-ui-model-selection/client'
-import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
+import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 
 import { CollapsibleModelSelect } from './CollapsibleModelSelect.js'
@@ -14,15 +14,12 @@ import type { PreferencesStore } from './preferences.js'
  * against a directory adapter backed by the chat conversation's model state.
  */
 export interface ChatModelDirectoryFace {
-  getDirectory(): {
-    subscribe(listener: () => void): () => void
-    getSnapshot(): {
-      groups: ModelDirectoryState['groups']
-      current: ModelSelection | null
+  getDirectory(): ObservableSnapshot<
+    ModelDirectoryState & {
       available: boolean
       locked: boolean
     }
-  }
+  >
   load(): void
   select(selection: ModelSelection): Promise<boolean>
 }
@@ -49,7 +46,7 @@ export function ChatModelSelect({ t, preferences, getDirectory, load, select }: 
     <CollapsibleModelSelect
       available={state.available}
       locked={state.locked}
-      directory={directory as unknown as SnapshotStore<ModelDirectoryState>}
+      directory={directory}
       load={load}
       select={select}
       preferences={preferences}

@@ -3,7 +3,7 @@
 ## DeepSeek Harness
 
 The component behavior and styling are adapted from
-`@deepseek-ai/dsh-client-ui-model-selection` version `0.1.0-rc.6`, part of
+`@deepseek-ai/dsh-client-ui-model-selection` version `0.1.1-rc.2`, part of
 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
 Copyright (c) 2026 DeepSeek
